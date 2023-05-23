@@ -1,0 +1,21 @@
+#Statitstique descriptive
+sexeun <- pie(table(Data$Sexe))
+summary(Data$Taille)
+tapply(Data$Taille, Data$Pays, mean)
+cor(Data$Taille,Data$Age)
+categories <- cut(Data$Taille,breaks = c(120, 140, 160, 180, max(Data$Taille)))
+
+#Question 2
+Data_sen_h <- subset(Data, Data$Pays == "Senegal" & Data$Sexe == "Boys")
+Data_sen_f <- subset(Data, Data$Pays == "Senegal" & Data$Sexe == "Girls")
+Data_pal_h <- subset(Data, Data$Pays == 
+"Occupied Palestinian Territory" & Data$Sexe == "Boys")
+Data_pal_f <- subset(Data, Data$Pays == 
+"Occupied Palestinian Territory" & Data$Sexe == "Girls")
+
+a <- (Data_sen_h$Taille)
+b <- (Data_sen_f$Taille)
+c <- (Data_pal_h$Taille)
+d <-(Data_pal_h$Taille)
+
+plot(a,Data_sen_h$Age)
