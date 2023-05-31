@@ -1,7 +1,16 @@
 #Statitstique descriptive
 coefficient_cor <- cor(Data$Taille,Data$Age)
 
+plot(Data$Pays,Data$Age,col = ifelse(Data$Pays == "Senegal","pink","red"))
+
 plot(Data$Taille,Data$Age,
      col = ifelse(Data$Pays == "Senegal", "red","blue"), 
-     main = "La taille en cm de la population en fonction de l'âge", xlab = "Taille en cm", ylab = "Age",
+     main = "La taille en cm en fonction de l'âge", xlab = "Taille en cm", ylab = "Age",
      abline(col = "pink",v=mean(Data$Taille, na.rm = TRUE,)))
+
+#2
+dfsenegal <- subset(Data,Data$Pays == "Senegal")
+dfpalestine <- subset(Data,Data$Pays == "Occupied Palestinian Territory")
+
+fit_senegal <- lm(dfsenegal$Taille ~ poly(dfsenegal$Age, degree = 4))
+fit_palestine <- lm(dfpalestine$Taille ~ poly(dfpalestine$Age, degree = 4))
