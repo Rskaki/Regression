@@ -4,6 +4,6 @@ The methodology of this study is as follows: for each country, 200 doctors (gene
 
 For each country in the study, the age and height of 4000 children (2000 of each sex) were available
 
-1- A descriptive analysis of the variables.
-2- Polynomial fitting of growth curves
-3- Median growth curve, as well as curves corresponding to the first and third quartiles. 
+1 - A descriptive analysis of the variables.
+2 - Polynomial fitting of growth curves
+3 - Median growth curve, as well as curves corresponding to the first and third quartiles. 
