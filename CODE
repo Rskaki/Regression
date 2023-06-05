@@ -1,16 +1,90 @@
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("tidyverse")
+library(tidyverse)
 #Statitstique descriptive
-coefficient_cor <- cor(Data$Taille,Data$Age)
 
-plot(Data$Pays,Data$Age,col = ifelse(Data$Pays == "Senegal","pink","red"))
+plot(Data$Age,Data$Taille,
+     col = ifelse(Data$Pays == "Senegal", "yellow","blue"), 
+     main = "La taille en cm en fonction de l'âge", xlab = "Age", ylab = "Taille en cm",
+     abline(col = "red",v=mean(Data$Taille, na.rm = TRUE,)))
 
-plot(Data$Taille,Data$Age,
-     col = ifelse(Data$Pays == "Senegal", "red","blue"), 
-     main = "La taille en cm en fonction de l'âge", xlab = "Taille en cm", ylab = "Age",
-     abline(col = "pink",v=mean(Data$Taille, na.rm = TRUE,)))
 
 #2
+
 dfsenegal <- subset(Data,Data$Pays == "Senegal")
 dfpalestine <- subset(Data,Data$Pays == "Occupied Palestinian Territory")
 
-fit_senegal <- lm(dfsenegal$Taille ~ poly(dfsenegal$Age, degree = 4))
-fit_palestine <- lm(dfpalestine$Taille ~ poly(dfpalestine$Age, degree = 4))
+senboys = filter(dfsenegal, dfsenegal$Sexe == "Boys")
+sengirls = filter(dfsenegal, dfsenegal$Sexe == "Girls")
+palboys = filter(dfpalestine, dfpalestine$Sexe == "Boys")
+palgirls = filter(dfpalestine, dfpalestine$Sexe == "Girls")
+
+#Garçon sénégalais
+fit_senegalboys <- lm(senboys$Taille ~ poly(senboys$Age,raw =TRUE, degree = 3))
+summary(fit_senegalboys)
+a = fit_senegalboys$coefficients[1]
+b = fit_senegalboys$coefficients[2]
+c = fit_senegalboys$coefficients[3]
+d = fit_senegalboys$coefficients[4]
+
+
+plot(senboys$Age,senboys$Taille, col ="red", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- c(0:20)
+lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
+
+#Fille sénégalaise
+fit_senegalgirls <- lm(sengirls$Taille ~ poly(sengirls$Age, raw = TRUE, degree = 3))
+a = fit_senegalgirls$coefficients[1]
+b = fit_senegalgirls$coefficients[2]
+c = fit_senegalgirls$coefficients[3]
+d = fit_senegalgirls$coefficients[4]
+
+plot(sengirls$Age,sengirls$Taille, col ="green", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- c(0:20)
+lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
+
+
+#Garçon Palestinien
+fit_palestineboys <- lm(palboys$Taille ~ poly(palboys$Age, raw = TRUE, degree = 3))
+a = fit_palestineboys$coefficients[1]
+b = fit_palestineboys$coefficients[2]
+c = fit_palestineboys$coefficients[3]
+d = fit_palestineboys$coefficients[4]
+
+plot(palboys$Age,palboys$Taille, col ="pink", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- c(0:20)
+lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
+
+#Fille Palestinienne
+fit_palestinegirls <- lm(palgirls$Taille ~ poly(palgirls$Age, raw = TRUE, degree = 3))
+a = fit_palestinegirls$coefficients[1]
+b = fit_palestinegirls$coefficients[2]
+c = fit_palestinegirls$coefficients[3]
+d = fit_palestinegirls$coefficients[4]
+
+plot(palgirls$Age,palgirls$Taille, col ="yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- c(0:20)
+lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
+
+#3
+Data$data2 <- cut(Data$Age, c(4,6,8,10,12,14,16,18,20))
+
+plot(Data$Age,Data$Taille,
+     col = "yellow",
+     pch = 16,
+     ylab = 'Taille', xlab = 'Âge',
+     main = "Courbes des quartiles par tranches d'âge de 2 en 2 sur le nuage de point")
+
+quantil <- aggregate(x= Data$Taille, by = list(Data$data2), FUN =quantile)
+
+lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,2],col = "orange",lwd = 2)
+lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,3],col = "red",lwd = 2)
+lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,4],col = "brown",lwd = 2)
+
+legend("bottomright", c("1er quartile", "Médiane", "3ème quartile"), col = c('orange','red','brown'),lwd = 2)
+
+
+plot(Data$Age,Data$Taille,ylab = "Taille", xlab = "Age", 
+     col = ifelse(Data$Pays == "Senegal" & Data$Sexe == "Boys","brown",ifelse(Data$Pays == "Occupied Palestinian Territory" & Data$Sexe == "Boys","green",ifelse(Data$Pays == "Senegal" & Data$Sexe == "Girls","purple",ifelse(Data$Pays == "Occupied Palestinian Territory" & Data$Sexe == "Girls","yellow","gray")))))
+legend("topleft", c("Garçon Sénégalais", "Garçon Palestinien", "Fille Sénégalaise", "Fille Palestinienne"), col = c('brown','green','purple','yellow'),lwd=10)
