@@ -2,15 +2,32 @@ install.packages("ggplot2")
 library(ggplot2)
 install.packages("tidyverse")
 library(tidyverse)
-#Statitstique descriptive
+install.packages("Hmisc")
+library(Hmisc)
+
+
+
+###############################################################
+#####                 Statistique Descriptive         ########
+##################################################     
+describe(Data)
+
+
+plot(Data$Age, Data$Taille,
+     col = ifelse(Data$Pays == "Senegal", "yellow", "blue"), 
+     main = "La taille en cm en fonction de l'âge", xlab = "Age", ylab = "Taille en cm",
+     abline(col = "red", v = mean(Data$Taille, na.rm = TRUE)))
 
 plot(Data$Age,Data$Taille,
-     col = ifelse(Data$Pays == "Senegal", "yellow","blue"), 
-     main = "La taille en cm en fonction de l'âge", xlab = "Age", ylab = "Taille en cm",
-     abline(col = "red",v=mean(Data$Taille, na.rm = TRUE,)))
+     col = ifelse(Data$Pays == "Senegal" & Data$Sexe == "Boys","brown",ifelse(Data$Pays == "Occupied Palestinian Territory" & Data$Sexe == "Boys","green",ifelse(Data$Pays == "Senegal" & Data$Sexe == "Girls","purple",ifelse(Data$Pays == "Occupied Palestinian Territory" & Data$Sexe == "Girls","yellow","gray")))))
+legend("topleft", c("Garçon Sénégalais", "Garçon Palestinien", "Fille Sénégalaise", "Fille Palestinienne"), col = c('brown','green','purple','yellow'),lwd=10)
 
+plot(Data$Sexe,Data$Taille, ylab = "Taille", xlab = "Sexe",
+     col = ifelse(Data$Sexe == "Boys", "lightblue","pink"))
 
-#2
+###############################################################
+#####                 Question 2                      ########
+     ##################################################                                                        
 
 dfsenegal <- subset(Data,Data$Pays == "Senegal")
 dfpalestine <- subset(Data,Data$Pays == "Occupied Palestinian Territory")
@@ -20,7 +37,172 @@ sengirls = filter(dfsenegal, dfsenegal$Sexe == "Girls")
 palboys = filter(dfpalestine, dfpalestine$Sexe == "Boys")
 palgirls = filter(dfpalestine, dfpalestine$Sexe == "Girls")
 
-#Garçon sénégalais
+################## Senegal
+#######################Ajustement linéaire sur le nuage de points
+X <- dfsenegal$Age
+Y <- dfsenegal$Taille
+a <- cov(X,Y)/var(X)
+b <- mean(Y)-a*mean(X)
+model <- plot(X,Y, col = "yellow",xlab="Age",pch = 16,ylab="Taille",main="relation")
+abline(b,a,col="red",lwd=2)
+
+r <- cor(X,Y)
+Rcarre <- r**2
+
+text(x = max(X), y = max(Y), labels = paste0("r = ", round(r, 2)), pos = 2)
+text(x = max(X), y = max(Y) - 2, labels = paste0("Rcarre = ", round(Rcarre, 2)), pos = 2)
+
+
+
+#######################Polynome d'ordre 2
+fit_senegal2 <- lm(Taille ~ poly(Age, 2, raw = TRUE), data = dfsenegal)
+summary(fit_senegal2)
+a <- fit_senegal2$coefficients[1]
+b <- fit_senegal2$coefficients[2]
+c <- fit_senegal2$coefficients[3]
+
+plot(dfsenegal$Age, dfsenegal$Taille, col = "yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- 0:20
+lines(x, a + b * x + c * x^2, col = "red", lwd = 7)
+
+
+
+#######################Polynome d'ordre 3
+fit_senegal3 <- lm(dfsenegal$Taille ~ poly(dfsenegal$Age,raw =TRUE, degree = 3))
+summary(fit_senegal3)
+d = fit_senegal3$coefficients[1]
+e = fit_senegal3$coefficients[2]
+f = fit_senegal3$coefficients[3]
+g = fit_senegal3$coefficients[4]
+plot(dfsenegal$Age,dfsenegal$Taille, col ="yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- c(0:20)
+lines(x,g*x**3+f*x**2+e*x+d, col ="green", lwd = 7)
+
+
+#######################Polynome d'ordre 4
+fit_senegal4 <- lm(Taille ~ poly(Age, 4, raw = TRUE), data = dfsenegal)
+summary(fit_senegal4)
+h <- fit_senegal4$coefficients[1]
+i <- fit_senegal4$coefficients[2]
+j <- fit_senegal4$coefficients[3]
+k <- fit_senegal4$coefficients[4]
+l <- fit_senegal4$coefficients[5]
+
+plot(dfsenegal$Age, dfsenegal$Taille, col = "yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- 0:20
+lines(x, h + i * x + j * x^2 + k * x^3 + l * x^4, col = "pink", lwd = 7)
+
+#######################Polynome d'ordre 5
+fit_senegal5 <- lm(Taille ~ poly(Age, 5, raw = TRUE), data = dfsenegal)
+summary(fit_senegal5)
+m <- fit_senegal5$coefficients[1]
+n <- fit_senegal5$coefficients[2]
+o <- fit_senegal5$coefficients[3]
+p <- fit_senegal5$coefficients[4]
+q <- fit_senegal5$coefficients[5]
+r <- fit_senegal5$coefficients[6]
+
+plot(dfsenegal$Age, dfsenegal$Taille, col = "yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- 0:20
+lines(x, m + n * x + o * x^2 + p * x^3 + q * x^4 + r * x^5, col = "yellow", lwd = 7)
+
+####################### Graphique avec toutes les courbes des différents degrés pour le Sénégal
+plot(dfsenegal$Age,dfsenegal$Taille, col = "#666666",pch = 16, lwd = 1, ylab = "Taille", xlab = "Age",
+     main = "Ajustement polynomial des 4 courbes de croissance pour le Senegal")
+lines(x, a + b * x + c * x^2, col = "red", lwd = 3)
+lines(x,g*x**3+f*x**2+e*x+d, col ="green", lwd = 3)
+lines(x, h + i * x + j * x^2 + k * x^3 + l * x^4, col = "pink", lwd = 3)
+lines(x, m + n * x + o * x^2 + p * x^3 + q * x^4 + r * x^5, col = "yellow", lwd = 3)
+legend("bottomright", c("Polynome de degré 2", "Polynome de degré 3", "Polynome de degré 4",
+                        "Polynome de degré 5"), col = c('red','green','pink','yellow'),lwd = 5)
+
+
+
+
+
+################## Occupied Palestine territory
+#######################Ajustement linéaire sur le nuage de points
+X <- dfpalestine$Age
+Y <- dfpalestine$Taille
+a <- cov(X,Y)/var(X)
+b <- mean(Y)-a*mean(X)
+model <- plot(X,Y, col = "yellow",xlab="Age",pch = 16,ylab="Taille",main="relation")
+abline(b,a,col="red",lwd=2)
+
+r <- cor(X,Y)
+Rcarre <- r**2
+
+text(x = max(X), y = max(Y), labels = paste0("r = ", round(r, 2)), pos = 2)
+text(x = max(X), y = max(Y) - 2, labels = paste0("Rcarre = ", round(Rcarre, 2)), pos = 2)
+
+#######################Polynome d'ordre 2
+fit_palestine2 <- lm(Taille ~ poly(Age, 2, raw = TRUE), data = dfpalestine)
+summary(fit_palestine2)
+a <- fit_palestine2$coefficients[1]
+b <- fit_palestine2$coefficients[2]
+c <- fit_palestine2$coefficients[3]
+
+plot(dfpalestine$Age, dfpalestine$Taille, col = "yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- 0:20
+lines(x, a + b * x + c * x^2, col = "red", lwd = 7)
+
+
+#######################Polynome d'ordre 3
+fit_palestine3 <- lm(dfpalestine$Taille ~ poly(dfpalestine$Age,raw =TRUE, degree = 3))
+summary(fit_palestine3)
+d = fit_palestine3$coefficients[1]
+e = fit_palestine3$coefficients[2]
+f = fit_palestine3$coefficients[3]
+g = fit_palestine3$coefficients[4]
+plot(dfpalestine$Age,dfpalestine$Taille, col ="yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- c(0:20)
+lines(x,g*x**3+f*x**2+e*x+d, col ="green", lwd = 7)
+
+#######################Polynome d'ordre 4
+fit_palestine4 <- lm(Taille ~ poly(Age, 4, raw = TRUE), data = dfpalestine)
+summary(fit_palestine4)
+h <- fit_palestine4$coefficients[1]
+i <- fit_palestine4$coefficients[2]
+j <- fit_palestine4$coefficients[3]
+k <- fit_palestine4$coefficients[4]
+l <- fit_palestine4$coefficients[5]
+
+plot(dfpalestine$Age, dfpalestine$Taille, col = "yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- 0:20
+lines(x, h + i * x + j * x^2 + k * x^3 + l * x^4, col = "pink", lwd = 7)
+
+#######################Polynome d'ordre 5
+fit_palestine5 <- lm(Taille ~ poly(Age, 5, raw = TRUE), data = dfpalestine)
+summary(fit_palestine5)
+m <- fit_palestine5$coefficients[1]
+n <- fit_palestine5$coefficients[2]
+o <- fit_palestine5$coefficients[3]
+p <- fit_palestine5$coefficients[4]
+q <- fit_palestine5$coefficients[5]
+r <- fit_palestine5$coefficients[6]
+
+plot(dfpalestine$Age, dfpalestine$Taille, col = "yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+x <- 0:20
+lines(x, m + n * x + o * x^2 + p * x^3 + q * x^4 + r * x^5, col = "lightblue", lwd = 7)
+
+####################### Graphique avec toutes les courbes des différents degrés pour la Palestine
+plot(dfsenegal$Age,dfsenegal$Taille, col = "#666666",pch = 16, lwd = 1, ylab = "Taille", xlab = "Age",
+     main = "Ajustement polynomial des 4 courbes de croissance pour la Palestine")
+lines(x, a + b * x + c * x^2, col = "red", lwd = 3)
+lines(x,g*x**3+f*x**2+e*x+d, col ="green", lwd = 3)
+lines(x, h + i * x + j * x^2 + k * x^3 + l * x^4, col = "pink", lwd = 3)
+lines(x, m + n * x + o * x^2 + p * x^3 + q * x^4 + r * x^5, col = "lightblue", lwd = 3)
+legend("bottomright", c("Polynome de degré 2", "Polynome de degré 3", "Polynome de degré 4",
+                        "Polynome de degré 5"), col = c('red','green','pink','lightblue'),lwd = 5)
+
+
+
+##############################################################################
+#####     Comparaison par rapport au Sexe dans chaque Pays          ########
+####################################################################    
+
+
+##################Garçon sénégalais
 fit_senegalboys <- lm(senboys$Taille ~ poly(senboys$Age,raw =TRUE, degree = 3))
 summary(fit_senegalboys)
 a = fit_senegalboys$coefficients[1]
@@ -29,45 +211,52 @@ c = fit_senegalboys$coefficients[3]
 d = fit_senegalboys$coefficients[4]
 
 
-plot(senboys$Age,senboys$Taille, col ="red", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+plot(senboys$Age,senboys$Taille, col ="red", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age",main = "Ajustement polynomial de degré 3 pour les 
+     garçons sénégalais")
 x <- c(0:20)
 lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
 
-#Fille sénégalaise
+##################Fille sénégalaise
 fit_senegalgirls <- lm(sengirls$Taille ~ poly(sengirls$Age, raw = TRUE, degree = 3))
 a = fit_senegalgirls$coefficients[1]
 b = fit_senegalgirls$coefficients[2]
 c = fit_senegalgirls$coefficients[3]
 d = fit_senegalgirls$coefficients[4]
 
-plot(sengirls$Age,sengirls$Taille, col ="green", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+plot(sengirls$Age,sengirls$Taille, col ="green", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age",main = "Ajustement polynomial de degré 3 pour les 
+     filles sénégalaises")
 x <- c(0:20)
 lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
 
 
-#Garçon Palestinien
+##################Garçon Palestinien
 fit_palestineboys <- lm(palboys$Taille ~ poly(palboys$Age, raw = TRUE, degree = 3))
 a = fit_palestineboys$coefficients[1]
 b = fit_palestineboys$coefficients[2]
 c = fit_palestineboys$coefficients[3]
 d = fit_palestineboys$coefficients[4]
 
-plot(palboys$Age,palboys$Taille, col ="pink", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+plot(palboys$Age,palboys$Taille, col ="pink", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age",main = "Ajustement polynomial de degré 3 pour les 
+     garçons palestiniennes")
 x <- c(0:20)
 lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
 
-#Fille Palestinienne
+##################Fille Palestinienne
 fit_palestinegirls <- lm(palgirls$Taille ~ poly(palgirls$Age, raw = TRUE, degree = 3))
 a = fit_palestinegirls$coefficients[1]
 b = fit_palestinegirls$coefficients[2]
 c = fit_palestinegirls$coefficients[3]
 d = fit_palestinegirls$coefficients[4]
 
-plot(palgirls$Age,palgirls$Taille, col ="yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age")
+plot(palgirls$Age,palgirls$Taille, col ="yellow", pch = 16, lwd = 1, ylab = "Taille", xlab = "Age", main = "Ajustement polynomial de degré 3 pour les 
+     filles palestiniennes")
 x <- c(0:20)
 lines(x,d*x**3+c*x**2+b*x+a, col ="black", lwd = 7)
 
-#3
+###############################################################
+#####                 Question 3                    ########
+##################################################                                                        
+
 Data$data2 <- cut(Data$Age, c(4,6,8,10,12,14,16,18,20))
 
 plot(Data$Age,Data$Taille,
@@ -78,13 +267,11 @@ plot(Data$Age,Data$Taille,
 
 quantil <- aggregate(x= Data$Taille, by = list(Data$data2), FUN =quantile)
 
-lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,2],col = "orange",lwd = 2)
-lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,3],col = "red",lwd = 2)
-lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,4],col = "brown",lwd = 2)
+lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,2],col = "orange",lwd = 5)
+lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,3],col = "red",lwd = 5)
+lines(x=c(5,7,9,11,13,15,17,19), y=quantil$x[,4],col = "brown",lwd = 5)
 
-legend("bottomright", c("1er quartile", "Médiane", "3ème quartile"), col = c('orange','red','brown'),lwd = 2)
+legend("bottomright", c("1er quartile", "Médiane", "3ème quartile"), col = c('orange','red','brown'),lwd = 5)
 
 
-plot(Data$Age,Data$Taille,ylab = "Taille", xlab = "Age", 
-     col = ifelse(Data$Pays == "Senegal" & Data$Sexe == "Boys","brown",ifelse(Data$Pays == "Occupied Palestinian Territory" & Data$Sexe == "Boys","green",ifelse(Data$Pays == "Senegal" & Data$Sexe == "Girls","purple",ifelse(Data$Pays == "Occupied Palestinian Territory" & Data$Sexe == "Girls","yellow","gray")))))
-legend("topleft", c("Garçon Sénégalais", "Garçon Palestinien", "Fille Sénégalaise", "Fille Palestinienne"), col = c('brown','green','purple','yellow'),lwd=10)
+
